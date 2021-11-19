@@ -6,8 +6,9 @@ type storage struct {
 	db string
 }
 
+var s = storage{nil, "", ""}
+
 func Init(c string) storage {
-	s := storage{nil, "", ""}
 	switch c {
 	case "mem":
 		s.m = make(map[string]string)
@@ -16,20 +17,28 @@ func Init(c string) storage {
 		s.d = "db connection blah blah blah"
 		s.db = "postgres"
 	}
-	println(s.m, s.d, s.db)
 	return s
 }
 
-func hashUrl(url string) string {
-
-}
-
-func SaveUrl(url string, s storage) string {
-	short := hashUrl(url)
+func SaveUrl(url string) string {
+	shorturl := hashUrl(url)
 	switch s.db {
 	case "memory":
-		s.m[short] = url
+		for k, v := range s.m {
+			if v == url {
+				shorturl = k
+			} else if k == shorturl {
+				SaveUrl(url)
+			}
+		}
+		s.m[shorturl] = url
+
 	case "postgres":
 	}
-	return short
+	return shorturl
+}
+
+func hashUrl(url string) string {
+	shorturl := url
+	return shorturl
 }
