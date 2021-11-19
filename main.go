@@ -8,7 +8,10 @@ func main() {
 	c := "mem" //get this from arguments
 	shortener.Init(c)
 	shortener.SaveUrl("sdadkmwkmko")
+	shortener.SaveUrl("sdadkmwkmko")
+	shortener.SaveUrl("sdadkmwkmko")
+	shortener.SaveUrl("sdadkmwkmko")
 	shortener.SaveUrl("aksndoakwndo")
-	println(shortener.SaveUrl("13213v23"))
+	println(shortener.LookupUrl("aksndoakwsndo"))
 
 }

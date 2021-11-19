@@ -42,3 +42,17 @@ func hashUrl(url string) string {
 	shorturl := url
 	return shorturl
 }
+
+func LookupUrl(shorturl string) string {
+	var fullurl string
+	switch s.db {
+	case "memory":
+		if s.m[shorturl] == "" {
+			fullurl = "Url does not exist"
+		} else {
+			fullurl = s.m[shorturl]
+		}
+	case "postgres":
+	}
+	return fullurl
+}
