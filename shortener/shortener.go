@@ -1,5 +1,10 @@
 package shortener
 
+import (
+	"math/rand"
+	"strings"
+)
+
 type storage struct {
 	m  map[string]string
 	d  string
@@ -21,7 +26,7 @@ func Init(c string) storage {
 }
 
 func SaveUrl(url string) string {
-	shorturl := hashUrl(url)
+	shorturl := generateUrl()
 	switch s.db {
 	case "memory":
 		for k, v := range s.m {
@@ -38,9 +43,15 @@ func SaveUrl(url string) string {
 	return shorturl
 }
 
-func hashUrl(url string) string {
-	shorturl := url
-	return shorturl
+const availableSymbols string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+
+func generateUrl() string {
+	var b strings.Builder
+	for i := 0; i < 10; i++ {
+		rnd := []byte{availableSymbols[rand.Intn(63)]}
+		b.Write(rnd)
+	}
+	return b.String()
 }
 
 func LookupUrl(shorturl string) string {

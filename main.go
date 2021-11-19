@@ -12,6 +12,7 @@ func main() {
 	shortener.SaveUrl("sdadkmwkmko")
 	shortener.SaveUrl("sdadkmwkmko")
 	shortener.SaveUrl("aksndoakwndo")
-	println(shortener.LookupUrl("aksndoakwsndo"))
+	println(shortener.LookupUrl("a21321ksndoa12312kwsndo"))
+	println(shortener.LookupUrl("sdadkmwkmko"))
 
 }
