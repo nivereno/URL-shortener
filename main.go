@@ -9,23 +9,24 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/mux"
+	"github.com/nivereno/URL-shortener/handlers"
 	"github.com/nivereno/URL-shortener/shortener"
 )
 
 func main() {
 	c := "mem" //get this from arguments
 	shortener.Init(c)
-	shortener.SaveUrl("sdadkmwkmko")
-	shortener.SaveUrl("sdadkmwkmko")
-	shortener.SaveUrl("sdsafdsafdfasfko")
-	shortener.SaveUrl("1342dasfasdf")
-	shortener.SaveUrl("aksndoakwndo")
-	println(shortener.LookupUrl("a21321ksndoa12312kwsndo"))
-	println(shortener.LookupUrl("sdadkmwkmko"))
 
 	l := log.New(os.Stdout, "shortener-api", log.LstdFlags)
-	r := chi.NewRouter()
+	r := mux.NewRouter()
+	sh := handlers.NewShortener(l)
+
+	postRouter := r.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", sh.AddUrl)
+
+	getRouter := r.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/", sh.LookupUrl)
 
 	s := &http.Server{
 		Addr:         ":8080",
