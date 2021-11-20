@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -23,10 +22,10 @@ func main() {
 	sh := handlers.NewShortener(l)
 
 	postRouter := r.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/", sh.AddUrl)
+	postRouter.HandleFunc("/", sh.PostUrl)
 
 	getRouter := r.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", sh.LookupUrl)
+	getRouter.HandleFunc("/", sh.GetUrl)
 
 	s := &http.Server{
 		Addr:         ":8080",
@@ -48,12 +47,12 @@ func main() {
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
-	signal.Notify(sigChan, syscall.SIGTERM)
 
-	sig := <-sigChan
-	l.Println("Recieved terminate, graceful shutdown", sig)
+	<-sigChan
+	l.Println("Recieved terminate, graceful shutdown")
 
 	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	s.Shutdown(tc)
-	cancel()
+	os.Exit(0)
 }
