@@ -15,7 +15,7 @@ var s = storage{nil, "", ""}
 
 func Init(c string) storage {
 	switch c {
-	case "mem":
+	case "m":
 		s.m = make(map[string]string)
 		s.db = "memory"
 	case "db":
@@ -47,7 +47,7 @@ const availableSymbols string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTU
 
 func generateUrl() string {
 	var b strings.Builder
-	for i := 0; i < 10; i++ {
+	for i := 0; i < len(availableSymbols); i++ {
 		rnd := []byte{availableSymbols[rand.Intn(63)]}
 		b.Write(rnd)
 	}

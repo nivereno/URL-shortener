@@ -3,7 +3,7 @@ package shortener
 import "testing"
 
 func TestSaveUrl(t *testing.T) {
-	Init("mem")
+	Init("m")
 	out := SaveUrl("https://golang.org/doc/")
 
 	if len(out) != 10 {
@@ -18,7 +18,7 @@ func TestSaveUrl(t *testing.T) {
 }
 
 func TestGetUrl(t *testing.T) {
-	Init("mem")
+	Init("m")
 	url := LookupUrl(SaveUrl("https://golang.org/doc/tutorial"))
 
 	if url != "https://golang.org/doc/tutorial" {

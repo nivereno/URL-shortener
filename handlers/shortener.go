@@ -18,13 +18,19 @@ func NewShortener(l *log.Logger) *Shortener {
 func (s *Shortener) PostUrl(rw http.ResponseWriter, r *http.Request) {
 	s.l.Println("Handle POST url")
 
-	url := "123"
-	shortener.SaveUrl(url)
+	url := r.URL.Query().Get("url")
+	code, err := rw.Write([]byte(shortener.SaveUrl(url)))
+	if err != nil {
+		http.Error(rw, "POST failed", code)
+	}
 }
 
 func (s *Shortener) GetUrl(rw http.ResponseWriter, r *http.Request) {
 	s.l.Println("Handle GET url")
 
-	shorturl := "132"
-	shortener.LookupUrl(shorturl)
+	shorturl := r.URL.Path[1:]
+	code, err := rw.Write([]byte(shortener.LookupUrl(shorturl)))
+	if err != nil {
+		http.Error(rw, "GET failed", code)
+	}
 }

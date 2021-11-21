@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	c := "mem" //get this from arguments
+	c := "m" //get this from arguments
 	shortener.Init(c)
 
 	l := log.New(os.Stdout, "shortener-api", log.LstdFlags)
@@ -25,7 +25,7 @@ func main() {
 	postRouter.HandleFunc("/", sh.PostUrl)
 
 	getRouter := r.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", sh.GetUrl)
+	getRouter.HandleFunc("/{shorturl:[a-zA-Z0-9_]+}", sh.GetUrl)
 
 	s := &http.Server{
 		Addr:         ":8080",
