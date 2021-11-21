@@ -47,7 +47,7 @@ const availableSymbols string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTU
 
 func generateUrl() string {
 	var b strings.Builder
-	for i := 0; i < len(availableSymbols); i++ {
+	for i := 0; i < 10; i++ {
 		rnd := []byte{availableSymbols[rand.Intn(63)]}
 		b.Write(rnd)
 	}

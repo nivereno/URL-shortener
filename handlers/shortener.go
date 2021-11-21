@@ -18,7 +18,8 @@ func NewShortener(l *log.Logger) *Shortener {
 func (s *Shortener) PostUrl(rw http.ResponseWriter, r *http.Request) {
 	s.l.Println("Handle POST url")
 
-	url := r.URL.Query().Get("url")
+	r.ParseForm()
+	url := r.Form.Get("url")
 	code, err := rw.Write([]byte(shortener.SaveUrl(url)))
 	if err != nil {
 		http.Error(rw, "POST failed", code)
