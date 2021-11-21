@@ -13,6 +13,7 @@ type storage struct {
 
 var s = storage{nil, "", ""}
 
+// Is called at the start of execution to choose the prefered data storage method and initialize it
 func Init(c string) {
 	switch c {
 	case "m":
@@ -24,6 +25,7 @@ func Init(c string) {
 	}
 }
 
+// Takes a full url, calls generateUrl, saves shortened url associated with full url and returns shortened url
 func SaveUrl(url string) string {
 	shorturl := generateUrl()
 	switch s.db {
@@ -42,8 +44,10 @@ func SaveUrl(url string) string {
 	return shorturl
 }
 
+// Symbols that can be used to generate a shortened url
 const availableSymbols string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
+// Generates short url of length 10 from the available symbols
 func generateUrl() string {
 	var b strings.Builder
 	for i := 0; i < 10; i++ {
@@ -53,6 +57,7 @@ func generateUrl() string {
 	return b.String()
 }
 
+// Takes shortened url as an argument, checks if it exists in the db and returns the asociated full url
 func LookupUrl(shorturl string) string {
 	var fullurl string
 	switch s.db {

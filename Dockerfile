@@ -2,11 +2,15 @@
 
 FROM golang:latest
 
-RUN mkdir /app
-COPY ./ /app
+WORKDIR /app
+COPY .\ ./
 
-RUN go mod download
+RUN apt-get update
+RUN apt-get -y install postgresql-client
 
-RUN
+RUN ls -lah
+RUN go build -o ./main.go
 
-Expose 8080
+EXPOSE 8080
+
+CMD [ "/app/URL-shortener" ]
