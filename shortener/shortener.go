@@ -13,7 +13,7 @@ type storage struct {
 
 var s = storage{nil, "", ""}
 
-func Init(c string) storage {
+func Init(c string) {
 	switch c {
 	case "m":
 		s.m = make(map[string]string)
@@ -22,7 +22,6 @@ func Init(c string) storage {
 		s.d = "db connection blah blah blah"
 		s.db = "postgres"
 	}
-	return s
 }
 
 func SaveUrl(url string) string {

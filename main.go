@@ -48,8 +48,8 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
-	<-sigChan
-	l.Println("Recieved terminate, graceful shutdown")
+	sig := <-sigChan
+	l.Println("Recieved terminate, graceful shutdown", sig)
 
 	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
