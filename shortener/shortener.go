@@ -43,20 +43,20 @@ func SaveUrl(url string) string {
 		shorturl = SaveUrlMemory(url)
 	case "postgres":
 		shorturl = SaveUrlPostgres(url)
+	default:
+		shorturl = "No database selected"
 	}
 	return shorturl
 }
 
-// Takes a full url, calls generateUrl, saves shortened url associated with full url and returns shortened url
+// Takes a full url, calls generateUrl, saves shortened url associated with full url in memory and returns shortened url
 func SaveUrlMemory(url string) string {
 	shorturl := generateUrl()
-	if s.m[shorturl] == url {
-		return shorturl
-	} else if s.mb[url] != "" {
+	if s.mb[url] != "" {
 		shorturl = s.mb[url]
 		return shorturl
 	} else if s.m[shorturl] != url && s.m[shorturl] != "" {
-		SaveUrl(url)
+		SaveUrlMemory(url)
 	} else {
 		s.m[shorturl] = url
 		s.mb[url] = shorturl
@@ -64,6 +64,7 @@ func SaveUrlMemory(url string) string {
 	return shorturl
 }
 
+// Takes a full url, calls generateUrl, saves shortened url associated with full url in a postgres sql database and returns shortened url
 func SaveUrlPostgres(url string) string {
 	var shorturl string
 	return shorturl
@@ -82,17 +83,27 @@ func generateUrl() string {
 	return b.String()
 }
 
-// Takes shortened url as an argument, checks if it exists in the db and returns the asociated full url
+// Calls the correct lookup function for the selected database type and returns the result (the full url)
 func LookupUrl(shorturl string) string {
 	var fullurl string
 	switch s.db {
 	case "memory":
-		if s.m[shorturl] == "" {
-			fullurl = "Url does not exist"
-		} else {
-			fullurl = s.m[shorturl]
-		}
+		fullurl = SaveUrlMemory(shorturl)
 	case "postgres":
+		fullurl = SaveUrlPostgres(shorturl)
+	default:
+		fullurl = "No database selected"
+	}
+	return fullurl
+}
+
+// Takes shortened url as an argument, checks if it exists in the db and returns the asociated full url
+func LookupUrlMemory(shorturl string) string {
+	var fullurl string
+	if s.m[shorturl] == "" {
+		fullurl = "Url does not exist"
+	} else {
+		fullurl = s.m[shorturl]
 	}
 	return fullurl
 }
