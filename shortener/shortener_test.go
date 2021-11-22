@@ -2,30 +2,45 @@ package shortener
 
 import "testing"
 
-func TestSaveUrl(t *testing.T) {
+func TestSaveUrlMemory(t *testing.T) {
+	input := []string{"https://golang.org/doc/", "https://golang.org/doc/", "https://golang.org/doc/12321321", "https://golang.org/doc/asdasdasd"}
 	Init("m")
-	out := SaveUrl("https://golang.org/doc/")
-	out2 := SaveUrl("https://golang.org/doc/")
-	out3 := SaveUrl("https://golang.org/doc/asdasdas")
-
-	if len(out) != 10 || len(out2) != 10 || len(out3) != 10 {
-		t.Errorf("Shortened url is the wrong length")
+	for _, v := range input {
+		out := SaveUrl(v)
+		if len(out) != 10 {
+			t.Errorf("Shortened url is the wrong length")
+		}
+		if s.m[out] != (v) {
+			t.Errorf("Url not saved properly")
+		}
 	}
-	if s.m[out] != ("https://golang.org/doc/") {
-		t.Errorf("Url not saved properly")
-	}
-
-	//add test for db
-	Init("db")
 }
 
-func TestGetUrl(t *testing.T) {
+func TestSaveUrlPostgres(t *testing.T) {
+	input := []string{"https://golang.org/doc/", "https://golang.org/doc/", "https://golang.org/doc/12321321", "https://golang.org/doc/asdasdasd"}
+	Init("db")
+	for _, v := range input {
+		out := SaveUrl(v)
+		if len(out) != 10 {
+			t.Errorf("Shortened url is the wrong length")
+		}
+	}
+}
+
+func TestGetUrlMemory(t *testing.T) {
 	Init("m")
 	url := LookupUrl(SaveUrl("https://golang.org/doc/tutorial"))
 
 	if url != "https://golang.org/doc/tutorial" {
 		t.Errorf("Returned wrong url or no url")
 	}
+}
 
+func TestGetUrlPostgres(t *testing.T) {
 	Init("db")
+	url := LookupUrl(SaveUrl("https://golang.org/doc/tutorial"))
+
+	if url != "https://golang.org/doc/tutorial" {
+		t.Errorf("Returned wrong url or no url")
+	}
 }

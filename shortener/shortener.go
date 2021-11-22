@@ -89,12 +89,12 @@ func saveUrlPostgresHelper(url string, generatedurl string) (string, bool) {
 	var shorturl string
 	row.Scan(&shorturl)
 
-	query = `SELECT fullurl FROM urls WHERE shorturl=$1`
-	row = s.dbc.QueryRow(query, generatedurl)
+	query2 := `SELECT fullurl FROM urls WHERE shortenedurl=$1`
+	row2 := s.dbc.QueryRow(query2, generatedurl)
 	shortCollision := false
 	var fullurl string
-	row.Scan(&fullurl)
-	if shorturl == generatedurl && fullurl == url {
+	row2.Scan(&fullurl)
+	if fullurl != url && fullurl != "" {
 		shortCollision = true
 	}
 	return shorturl, shortCollision

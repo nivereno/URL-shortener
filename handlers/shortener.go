@@ -15,7 +15,7 @@ func NewShortener(l *log.Logger) *Shortener {
 	return &Shortener{l}
 }
 
-// Handles a post request, takes the full url from data {url:}, calls save url and writes the newly generated shorturl as a response
+// Handles a post request, takes the full url from data (-d url="some data"), calls save url and writes the newly generated shorturl as a response
 func (s *Shortener) PostUrl(rw http.ResponseWriter, r *http.Request) {
 	s.l.Println("Handle POST url")
 
