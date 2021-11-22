@@ -40,9 +40,9 @@ func SaveUrl(url string) string {
 	var shorturl string
 	switch s.db {
 	case "memory":
-		shorturl = SaveUrlMemory(url)
+		shorturl = saveUrlMemory(url)
 	case "postgres":
-		shorturl = SaveUrlPostgres(url)
+		shorturl = saveUrlPostgres(url)
 	default:
 		shorturl = "No database selected"
 	}
@@ -50,13 +50,13 @@ func SaveUrl(url string) string {
 }
 
 // Takes a full url, calls generateUrl, saves shortened url associated with full url in memory and returns shortened url
-func SaveUrlMemory(url string) string {
+func saveUrlMemory(url string) string {
 	shorturl := generateUrl()
 	if s.mb[url] != "" {
 		shorturl = s.mb[url]
 		return shorturl
 	} else if s.m[shorturl] != url && s.m[shorturl] != "" {
-		SaveUrlMemory(url)
+		saveUrlMemory(url)
 	} else {
 		s.m[shorturl] = url
 		s.mb[url] = shorturl
@@ -65,9 +65,39 @@ func SaveUrlMemory(url string) string {
 }
 
 // Takes a full url, calls generateUrl, saves shortened url associated with full url in a postgres sql database and returns shortened url
-func SaveUrlPostgres(url string) string {
-	var shorturl string
+func saveUrlPostgres(url string) string {
+	shorturl := generateUrl()
+	check, shortCollision := saveUrlPostgresHelper(url, shorturl)
+	if check != "" {
+		shorturl = check
+	} else if shortCollision {
+		saveUrlPostgres(url)
+	} else {
+		query := `INSERT INTO urls (shortenedurl, fullurl) VALUES ($1, $2)`
+		_, err := s.dbc.Exec(query, shorturl, url)
+		if err != nil {
+		}
+		return shorturl
+	}
 	return shorturl
+
+}
+
+func saveUrlPostgresHelper(url string, generatedurl string) (string, bool) {
+	query := `SELECT shortenedurl FROM urls WHERE fullurl=$1`
+	row := s.dbc.QueryRow(query, url)
+	var shorturl string
+	row.Scan(&shorturl)
+
+	query = `SELECT fullurl FROM urls WHERE shorturl=$1`
+	row = s.dbc.QueryRow(query, generatedurl)
+	shortCollision := false
+	var fullurl string
+	row.Scan(&fullurl)
+	if shorturl == generatedurl && fullurl == url {
+		shortCollision = true
+	}
+	return shorturl, shortCollision
 }
 
 // Symbols that can be used to generate a shortened url
@@ -88,22 +118,31 @@ func LookupUrl(shorturl string) string {
 	var fullurl string
 	switch s.db {
 	case "memory":
-		fullurl = SaveUrlMemory(shorturl)
+		fullurl = lookupUrlMemory(shorturl)
 	case "postgres":
-		fullurl = SaveUrlPostgres(shorturl)
+		fullurl = lookupUrlPostgres(shorturl)
 	default:
 		fullurl = "No database selected"
 	}
 	return fullurl
 }
 
-// Takes shortened url as an argument, checks if it exists in the db and returns the asociated full url
-func LookupUrlMemory(shorturl string) string {
+// Takes shortened url as an argument, checks if it exists in the in memory map and returns the asociated full url
+func lookupUrlMemory(shorturl string) string {
 	var fullurl string
 	if s.m[shorturl] == "" {
 		fullurl = "Url does not exist"
 	} else {
 		fullurl = s.m[shorturl]
 	}
+	return fullurl
+}
+
+// Takes shortened url as an argument, checks if it exists in postgres db and returns the asociated full url
+func lookupUrlPostgres(shorturl string) string {
+	query := `SELECT fullurl FROM urls WHERE shortenedurl=$1`
+	row := s.dbc.QueryRow(query, shorturl)
+	var fullurl string
+	row.Scan(&fullurl)
 	return fullurl
 }

@@ -27,7 +27,7 @@ func (s *Shortener) PostUrl(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Handles a get request, grabs the short url from the full call, calls lookup url to find the associated full url and returns it
+// Handles a get request, grabs the short url from the full call, calls lookup url to find the associated full url and return it
 func (s *Shortener) GetUrl(rw http.ResponseWriter, r *http.Request) {
 	s.l.Println("Handle GET url")
 
