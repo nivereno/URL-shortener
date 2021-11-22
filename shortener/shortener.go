@@ -1,46 +1,71 @@
 package shortener
 
 import (
+	"database/sql"
 	"math/rand"
 	"strings"
+
+	_ "github.com/lib/pq"
 )
 
 type storage struct {
-	m  map[string]string
-	d  string
-	db string
+	m   map[string]string
+	mb  map[string]string
+	dbc *sql.DB
+	db  string
 }
 
-var s = storage{nil, "", ""}
+var s = storage{nil, nil, nil, ""}
 
 // Is called at the start of execution to choose the prefered data storage method and initialize it
 func Init(c string) {
 	switch c {
 	case "m":
 		s.m = make(map[string]string)
+		s.mb = make(map[string]string)
 		s.db = "memory"
 	case "db":
-		s.d = "db connection blah blah blah"
+		connStr := "user=postgres dbname=postgres password=test host=localhost sslmode=disable"
+		var err error
+		s.dbc, err = sql.Open("postgres", connStr)
+		if err != nil {
+			s.dbc = nil
+		}
 		s.db = "postgres"
 	}
 }
 
-// Takes a full url, calls generateUrl, saves shortened url associated with full url and returns shortened url
+// Calls the correct save function for the selected database type and returns the result (the shortened url)
 func SaveUrl(url string) string {
-	shorturl := generateUrl()
+	var shorturl string
 	switch s.db {
 	case "memory":
-		for k, v := range s.m {
-			if v == url {
-				shorturl = k
-			} else if k == shorturl {
-				SaveUrl(url)
-			}
-		}
-		s.m[shorturl] = url
-
+		shorturl = SaveUrlMemory(url)
 	case "postgres":
+		shorturl = SaveUrlPostgres(url)
 	}
+	return shorturl
+}
+
+// Takes a full url, calls generateUrl, saves shortened url associated with full url and returns shortened url
+func SaveUrlMemory(url string) string {
+	shorturl := generateUrl()
+	if s.m[shorturl] == url {
+		return shorturl
+	} else if s.mb[url] != "" {
+		shorturl = s.mb[url]
+		return shorturl
+	} else if s.m[shorturl] != url && s.m[shorturl] != "" {
+		SaveUrl(url)
+	} else {
+		s.m[shorturl] = url
+		s.mb[url] = shorturl
+	}
+	return shorturl
+}
+
+func SaveUrlPostgres(url string) string {
+	var shorturl string
 	return shorturl
 }
 

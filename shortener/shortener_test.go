@@ -5,8 +5,10 @@ import "testing"
 func TestSaveUrl(t *testing.T) {
 	Init("m")
 	out := SaveUrl("https://golang.org/doc/")
+	out2 := SaveUrl("https://golang.org/doc/")
+	out3 := SaveUrl("https://golang.org/doc/asdasdas")
 
-	if len(out) != 10 {
+	if len(out) != 10 || len(out2) != 10 || len(out3) != 10 {
 		t.Errorf("Shortened url is the wrong length")
 	}
 	if s.m[out] != ("https://golang.org/doc/") {
