@@ -4,17 +4,22 @@ services:
     image: postgres
     restart: always
     env_file:
-      - .env
+      - shortener.env
     ports:
       - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-  server:
+    healthcheck:
+      test: ["pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 
+  url-shortener:
     build:
       context: .
       dockerfile: Dockerfile
-    env_file: .env
+    env_file: shortener.env
     depends_on:
       - database
     networks:

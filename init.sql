@@ -1,1 +1,1 @@
-CREATE TABLE urls (shortenedurl varchar(255) PRIMARY KEY unique, fullurls varchar(255) nut null unique);
+CREATE TABLE urls (shortenedurl varchar(255) PRIMARY KEY unique, fullurls varchar(255) not null unique);

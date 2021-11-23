@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	c := "db" //get this from arguments
+	c := os.Getenv("storage")
 	shortener.Init(c)
 
 	l := log.New(os.Stdout, "shortener-api", log.LstdFlags)

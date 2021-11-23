@@ -22,13 +22,13 @@ type storageStruct struct {
 var storage = storageStruct{nil, nil, nil, ""}
 
 // Is called at the start of execution to choose the prefered data storage method and initialize it
-func Init(c string) {
-	switch c {
-	case "m":
+func Init(mode string) {
+	switch mode {
+	case "memory":
 		storage.m = make(map[string]string)
 		storage.mb = make(map[string]string)
 		storage.db = "memory"
-	case "db":
+	case "postgres":
 		connStr := "user=postgres dbname=postgres password=test host=localhost sslmode=disable"
 		var err error
 		storage.dbc, err = sql.Open("postgres", connStr)
@@ -40,6 +40,8 @@ func Init(c string) {
 			panic(err)
 		}
 		storage.db = "postgres"
+	default:
+		panic("No or unsupported database selected, please provide arguments with docker compose")
 	}
 }
 
@@ -74,39 +76,43 @@ func saveUrlMemory(url string) string {
 
 // Takes a full url, calls generateUrl, saves shortened url associated with full url in a postgres sql database and returns shortened url
 func saveUrlPostgres(url string) string {
-	shorturl := generateUrl()
-	check, shortCollision := saveUrlPostgresHelper(url, shorturl)
-	if check != "" {
-		shorturl = check
-	} else if shortCollision {
-		saveUrlPostgres(url)
-	} else {
-		query := `INSERT INTO urls (shortenedurl, fullurl) VALUES ($1, $2)`
-		_, err := storage.dbc.Exec(query, shorturl, url)
-		if err != nil {
-			shorturl = "Failed to insert into DB"
+	shorturl := checkFullUrl(url)
+	if shorturl == "" {
+		for {
+			shorturl = generateUrl()
+			if !checkCollision(shorturl) {
+				query := `INSERT INTO urls (shortenedurl, fullurl) VALUES ($1, $2)`
+				_, err := storage.dbc.Exec(query, shorturl, url)
+				if err != nil {
+					shorturl = "Failed to insert into DB"
+				}
+				break
+			}
 		}
-		return shorturl
 	}
 	return shorturl
-
 }
 
-func saveUrlPostgresHelper(url string, generatedurl string) (string, bool) {
+// Checks if the full url already exists in the database and returns the correct shortened url if it does
+func checkFullUrl(url string) string {
 	query := `SELECT shortenedurl FROM urls WHERE fullurl=$1`
 	row := storage.dbc.QueryRow(query, url)
 	var shorturl string
 	row.Scan(&shorturl)
+	return shorturl
+}
 
-	query2 := `SELECT fullurl FROM urls WHERE shortenedurl=$1`
-	row2 := storage.dbc.QueryRow(query2, generatedurl)
+// Checks if the generated shortened url has been used before
+func checkCollision(shorturl string) bool {
+	query := `SELECT fullurl FROM urls WHERE shortenedurl=$1`
+	row := storage.dbc.QueryRow(query, shorturl)
 	shortCollision := false
 	var fullurl string
-	row2.Scan(&fullurl)
-	if fullurl != url && fullurl != "" {
+	row.Scan(&fullurl)
+	if fullurl != "" {
 		shortCollision = true
 	}
-	return shorturl, shortCollision
+	return shortCollision
 }
 
 // Symbols that can be used to generate a shortened url
