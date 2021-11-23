@@ -3,14 +3,10 @@
 FROM golang:latest
 
 WORKDIR /app
-COPY .\ ./
+COPY ./ ./
 
-RUN apt-get update
-RUN apt-get -y install postgresql-client
-
-RUN ls -lah
-RUN go build -o ./main.go
+RUN go build -o ./url-shortened
 
 EXPOSE 8080
 
-CMD [ "/app/URL-shortener" ]
+CMD [ "/app/url-shortener", "db" ]
