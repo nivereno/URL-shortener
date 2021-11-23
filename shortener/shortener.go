@@ -29,7 +29,7 @@ func Init(mode string) {
 		storage.mb = make(map[string]string)
 		storage.db = "memory"
 	case "postgres":
-		connStr := "user=postgres dbname=postgres password=test host=localhost sslmode=disable"
+		connStr := "user=postgres dbname=postgres password=test host=docker-postgres sslmode=disable"
 		var err error
 		storage.dbc, err = sql.Open("postgres", connStr)
 		if err != nil {
@@ -41,7 +41,7 @@ func Init(mode string) {
 		}
 		storage.db = "postgres"
 	default:
-		panic("No or unsupported database selected, please provide arguments with docker compose")
+		panic("No or unsupported database selected, please provide the env -e storage=(either postgres or memory) variable when using docker compose")
 	}
 }
 

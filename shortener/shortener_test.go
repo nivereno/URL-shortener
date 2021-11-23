@@ -17,7 +17,7 @@ func TestSaveUrlMemory(t *testing.T) {
 }
 
 func TestSaveUrlPostgres(t *testing.T) {
-	input := []string{"https://golang.org/doc/", "https://golang.org/doc/", "https://golang.org/doc/12321321", "https://golang.org/doc/asdasdasd", "https://golang.org/doc/a213123213sdasdasd", "https://golang.org/doc/asda12312312321sdasd", "https://golang.org/doc/qwertyu", "https://golang.org/doc/lglfdgdfg", "https://golang.org/doc/poiunnk", "https://golang.org/doc/poiunnkasdasd"}
+	input := []string{"https://golang.org/doc/", "https://golang.org/doc/", "https://golang.org/doc/12321321", "https://golang.org/doc/asdasd123asd", "https://golang.org/doc/a213123213sdasdasd", "https://golang.org/doc/asda12312312321sdasd", "https://golang.org/doc/qwertyu", "https://golang.org/doc/lglfdgdfg", "https://golang.org/doc/poiunnk", "https://golang.org/doc/poiunnkasdasd"}
 	Init("postgres")
 	for _, v := range input {
 		out := SaveUrl(v)

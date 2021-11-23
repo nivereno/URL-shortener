@@ -1,6 +1,7 @@
 version: "3.9"
 services:
   database:
+    container_name: docker-postgres
     image: postgres
     restart: always
     env_file:
@@ -8,14 +9,14 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["pg_isready"]
       interval: 10s
       timeout: 5s
       retries: 5 
   url-shortener:
+    container_name: url-shortener
     build:
       context: .
       dockerfile: Dockerfile
