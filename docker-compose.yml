@@ -9,12 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["pg_isready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5 
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql 
   url-shortener:
     container_name: url-shortener
     build:
