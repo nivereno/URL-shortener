@@ -31,10 +31,8 @@ func Init(mode string) {
 		storage.db = "memory"
 	case "postgres":
 		connStr := "user=postgres dbname=postgres password=test host=docker-postgres sslmode=disable"
-		for i := 0; i < 2; i++ {
-			storage.dbc, _ = sql.Open("postgres", connStr)
-			time.Sleep(5 * time.Second)
-		}
+		time.Sleep(10 * time.Second)
+		storage.dbc, _ = sql.Open("postgres", connStr)
 		err := storage.dbc.Ping()
 		if err != nil {
 			panic(err)
