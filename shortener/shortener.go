@@ -159,5 +159,8 @@ func lookupUrlPostgres(shorturl string) string {
 	row := storage.dbc.QueryRow(query, shorturl)
 	var fullurl string
 	row.Scan(&fullurl)
+	if fullurl == "" {
+		fullurl = "Url does not exist"
+	}
 	return fullurl
 }
