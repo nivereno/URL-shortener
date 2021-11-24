@@ -10,7 +10,7 @@ func TestSaveUrlMemory(t *testing.T) {
 		if len(out) != 10 {
 			t.Errorf("Shortened url is the wrong length")
 		}
-		if storage.m[out] != (v) {
+		if storage.memory[out] != (v) {
 			t.Errorf("Url not saved properly")
 		}
 	}

@@ -4,19 +4,20 @@ import (
 	"database/sql"
 	"math/rand"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 )
 
 type storageStruct struct {
 	// Map for saving data in memory
-	m map[string]string
+	memory map[string]string
 	// Map but backwards! Used to quickly look up the shorturl in case the url has already been saved
-	mb map[string]string
+	mBackwards map[string]string
 	// The database connection
-	dbc *sql.DB
+	databaseConnection *sql.DB
 	// Used to specify which data storage solution is in use
-	db string
+	dbType string
 }
 
 var storage = storageStruct{nil, nil, nil, ""}
@@ -25,17 +26,17 @@ var storage = storageStruct{nil, nil, nil, ""}
 func Init(mode string) {
 	switch mode {
 	case "memory":
-		storage.m = make(map[string]string)
-		storage.mb = make(map[string]string)
-		storage.db = "memory"
+		storage.memory = make(map[string]string)
+		storage.mBackwards = make(map[string]string)
+		storage.dbType = "memory"
 	case "postgres":
 		connStr := "user=postgres dbname=postgres password=test host=docker-postgres sslmode=disable"
-		storage.dbc, _ = sql.Open("postgres", connStr)
-		err := storage.dbc.Ping()
+		storage.databaseConnection, _ = sql.Open("postgres", connStr)
+		err := storage.databaseConnection.Ping()
 		if err != nil {
 			panic(err)
 		}
-		storage.db = "postgres"
+		storage.dbType = "postgres"
 	default:
 		panic("No or unsupported database selected, please provide the env -e storage=(either postgres or memory) variable when using docker compose")
 	}
@@ -44,7 +45,7 @@ func Init(mode string) {
 // Calls the correct save function for the selected database type and returns the result (the shortened url)
 func SaveUrl(url string) string {
 	var shorturl string
-	switch storage.db {
+	switch storage.dbType {
 	case "memory":
 		shorturl = saveUrlMemory(url)
 	case "postgres":
@@ -58,14 +59,14 @@ func SaveUrl(url string) string {
 // Takes a full url, calls generateUrl, saves shortened url associated with full url in memory and returns shortened url
 func saveUrlMemory(url string) string {
 	shorturl := generateUrl()
-	if storage.mb[url] != "" {
-		shorturl = storage.mb[url]
+	if storage.mBackwards[url] != "" {
+		shorturl = storage.mBackwards[url]
 		return shorturl
-	} else if storage.m[shorturl] != url && storage.m[shorturl] != "" {
+	} else if storage.memory[shorturl] != url && storage.memory[shorturl] != "" {
 		saveUrlMemory(url)
 	} else {
-		storage.m[shorturl] = url
-		storage.mb[url] = shorturl
+		storage.memory[shorturl] = url
+		storage.mBackwards[url] = shorturl
 	}
 	return shorturl
 }
@@ -78,7 +79,7 @@ func saveUrlPostgres(url string) string {
 			shorturl = generateUrl()
 			if !checkCollision(shorturl) {
 				query := `INSERT INTO urls (shortenedurl, fullurl) VALUES ($1, $2)`
-				_, err := storage.dbc.Exec(query, shorturl, url)
+				_, err := storage.databaseConnection.Exec(query, shorturl, url)
 				if err != nil {
 					shorturl = "Failed to insert into DB"
 				}
@@ -92,7 +93,7 @@ func saveUrlPostgres(url string) string {
 // Checks if the full url already exists in the database and returns the correct shortened url if it does
 func checkFullUrl(url string) string {
 	query := `SELECT shortenedurl FROM urls WHERE fullurl=$1`
-	row := storage.dbc.QueryRow(query, url)
+	row := storage.databaseConnection.QueryRow(query, url)
 	var shorturl string
 	row.Scan(&shorturl)
 	return shorturl
@@ -101,7 +102,7 @@ func checkFullUrl(url string) string {
 // Checks if the generated shortened url has been used before
 func checkCollision(shorturl string) bool {
 	query := `SELECT fullurl FROM urls WHERE shortenedurl=$1`
-	row := storage.dbc.QueryRow(query, shorturl)
+	row := storage.databaseConnection.QueryRow(query, shorturl)
 	shortCollision := false
 	var fullurl string
 	row.Scan(&fullurl)
@@ -116,6 +117,7 @@ const availableSymbols string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTU
 
 // Generates short url of length 10 from the available symbols
 func generateUrl() string {
+	rand.Seed(time.Now().UnixNano())
 	var b strings.Builder
 	for i := 0; i < 10; i++ {
 		rnd := []byte{availableSymbols[rand.Intn(63)]}
@@ -127,7 +129,7 @@ func generateUrl() string {
 // Calls the correct lookup function for the selected database type and returns the result (the full url)
 func LookupUrl(shorturl string) string {
 	var fullurl string
-	switch storage.db {
+	switch storage.dbType {
 	case "memory":
 		fullurl = lookupUrlMemory(shorturl)
 	case "postgres":
@@ -141,18 +143,18 @@ func LookupUrl(shorturl string) string {
 // Takes shortened url as an argument, checks if it exists in the in memory map and returns the asociated full url
 func lookupUrlMemory(shorturl string) string {
 	var fullurl string
-	if storage.m[shorturl] == "" {
+	if storage.memory[shorturl] == "" {
 		fullurl = "Url does not exist"
 	} else {
-		fullurl = storage.m[shorturl]
+		fullurl = storage.memory[shorturl]
 	}
 	return fullurl
 }
 
-// Takes shortened url as an argument, checks if it exists in postgres db and returns the asociated full url
+// Takes shortened url as an argument, checks if it exists in postgres dbType and returns the asociated full url
 func lookupUrlPostgres(shorturl string) string {
 	query := `SELECT fullurl FROM urls WHERE shortenedurl=$1`
-	row := storage.dbc.QueryRow(query, shorturl)
+	row := storage.databaseConnection.QueryRow(query, shorturl)
 	var fullurl string
 	row.Scan(&fullurl)
 	if fullurl == "" {
