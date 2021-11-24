@@ -14,12 +14,17 @@ import (
 )
 
 func main() {
-	c := os.Getenv("storage")
-	shortener.Init(c)
-
 	l := log.New(os.Stdout, "shortener-api", log.LstdFlags)
 	r := mux.NewRouter()
 	sh := handlers.NewShortener(l)
+
+	if os.Getenv("storage") == "postgres" {
+		l.Printf("Waiting for the postgres container to start up")
+		time.Sleep(10 * time.Second)
+		l.Printf("Done")
+	}
+	c := os.Getenv("storage")
+	shortener.Init(c)
 
 	postRouter := r.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", sh.PostUrl)

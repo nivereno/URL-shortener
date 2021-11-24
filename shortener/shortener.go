@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"math/rand"
 	"strings"
-	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -31,7 +30,6 @@ func Init(mode string) {
 		storage.db = "memory"
 	case "postgres":
 		connStr := "user=postgres dbname=postgres password=test host=docker-postgres sslmode=disable"
-		time.Sleep(10 * time.Second)
 		storage.dbc, _ = sql.Open("postgres", connStr)
 		err := storage.dbc.Ping()
 		if err != nil {

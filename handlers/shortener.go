@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/nivereno/URL-shortener/shortener"
 )
@@ -18,9 +19,14 @@ func NewShortener(l *log.Logger) *Shortener {
 // Handles a post request, takes the full url from data (-d url="some data"), calls save url and writes the newly generated shorturl as a response
 func (s *Shortener) PostUrl(rw http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	url := r.Form.Get("url")
-	s.l.Println("Handle POST url with data -d " + url)
-	code, err := rw.Write([]byte(shortener.SaveUrl(url)))
+	urlRaw := r.Form.Get("url")
+	s.l.Println("Handle POST url with data -d " + urlRaw)
+	_, err := url.ParseRequestURI(urlRaw)
+	if err != nil {
+		rw.Write([]byte("Invalid url provided make sure to add http://"))
+		return
+	}
+	code, err := rw.Write([]byte(shortener.SaveUrl(urlRaw)))
 	if err != nil {
 		http.Error(rw, "POST failed", code)
 	}
