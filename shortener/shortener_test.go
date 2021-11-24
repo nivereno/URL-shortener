@@ -14,6 +14,18 @@ func TestSaveUrlMemory(t *testing.T) {
 			t.Errorf("Url not saved properly")
 		}
 	}
+	a1 := SaveUrl("a")
+	c1 := SaveUrl("c")
+	a2 := SaveUrl("a")
+	b1 := SaveUrl("b")
+	c2 := SaveUrl("c")
+	b2 := SaveUrl("b")
+	c3 := SaveUrl("c")
+	b3 := SaveUrl("b")
+	b4 := SaveUrl("b")
+	if a1 != a2 || b1 != b2 || b1 != b3 || b1 != b4 || c1 != c2 || c2 != c3 {
+		t.Errorf("Saving the same data doesn't return the same key")
+	}
 }
 
 func TestSaveUrlPostgres(t *testing.T) {
