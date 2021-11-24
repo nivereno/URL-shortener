@@ -1,19 +1,33 @@
-Как запустить:
+<h1>URL-shortener</h1>
 
-Билдить коммандой docker-compose build
+<h2>Как запустить:</h2>
 
-Потом docker-compose run -e storage=memory -p 8080:8080 url-shortener (Для режима с сохранением в память, для режима postgress: -e storage=postgres)
+Билдить коммандой 
+```
+docker-compose build
+```
 
-Примеры запросов через curl:
+Потом для режима сохранения в память
+```
+docker-compose run -e storage=memory -p 8080:8080 url-shortener 
+```
+А для режима сохранения в postgres датабазу
+```
+docker-compose run -e storage=postgres -p 8080:8080 url-shortener
+```
+
+<h2>Примеры запросов через curl:</h2>
 
 POST:
-
-curl -d "url=http://go.dev/doc/tutorial/getting-started" http://localhost:8080 
+```
+curl -d "url=http://go.dev/doc/tutorial/getting-started" http://localhost:8080
+```
 
 Вернет сокращенный url и сохранит пару
 
 GET:
-
+```
 curl http://localhost:8080/....... (Вместо точек сокращенный url полученый от запроса POST)
+```
 
 Вернет полный url который сохраняли
