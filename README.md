@@ -18,6 +18,11 @@ docker-compose run -e storage=postgres -p 8080:8080 url-shortener
 
 <h2>Примеры запросов через curl:</h2>
 
+Иногда curl в винде не работает правильно, если запрос делается из powershell иногда нужно сделать 
+```
+remove-item alias:\curl
+```
+
 POST:
 ```
 curl -d "url=http://go.dev/doc/tutorial/getting-started" http://localhost:8080
