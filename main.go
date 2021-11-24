@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,9 +20,9 @@ func main() {
 	sh := handlers.NewShortener(l)
 
 	if os.Getenv("storage") == "postgres" {
-		l.Printf("Waiting for the postgres container to start up")
+		fmt.Println("Waiting for the postgres container to start up")
 		time.Sleep(10 * time.Second)
-		l.Printf("Done")
+		fmt.Println("Done")
 	}
 	c := os.Getenv("storage")
 	shortener.Init(c)
